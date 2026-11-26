@@ -1,13 +1,12 @@
 /* Fateborn Mutant — frontend config.
- * NOT DEPLOYED YET. CONTRACT_ADDRESS stays the zero address and
- * DEPLOYED stays false until a real deployment is verified on-chain
- * (same rule as RamenForge pre-deploy). PREDICTED_ADDRESS is the
- * CREATE2 prediction from deploy-package/prediction.json — for planning
- * only, never used as the live address. */
+ * LIVE on BSC mainnet. Contract v2 deployed 2026-11-26, Sourcify
+ * exact_match, creator/owner = W. v1 0xC260...5006 abandoned
+ * (creator was the CREATE2 proxy, setBaseURI/market broken), see DEPLOY.md.
+ * PREDICTED_ADDRESS is the CREATE2 prediction — now the live address. */
 const CONFIG = {
   CHAIN_ID: 56, // BSC mainnet
-  CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
-  DEPLOYED: false,
+  CONTRACT_ADDRESS: "0xE69dE61cC2c7E4d21a83647d3671d8c009515827",
+  DEPLOYED: true,
   PREDICTED_ADDRESS: "0xE69dE61cC2c7E4d21a83647d3671d8c009515827", // v2 (salt velt.fateborn.v2); v1 0xC260...5006 abandoned, see DEPLOY.md
   REGISTRY: "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F",
   RPC_URL: "https://bsc-dataseed.binance.org",
