@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Fateborn Mutant — dark-alchemy mutants on BNB Chain. Brew 1 of 2,126 Fateborn, feed Mutagens to mutate, duel for Gene Shards, evolve to Fated, Ascend to Eternal. In-site market, 5% fee (3% pool / 2% creator)." />
+  <meta name="theme-color" content="#0a0908" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Fateborn Mutant — Brew it. Feed it. Fear what it becomes." />
+  <meta property="og:description" content="You didn't build a machine. You brewed a Fateborn. Feed it Mutagens, watch it mutate, duel for Gene Shards, evolve to Fated, Ascend to Eternal — and take a guaranteed Ancestor spot in Season 2." />
+  <meta property="og:image" content="/art/ancestor.webp" />
+  <title>Fateborn Mutant — Brew it. Feed it. Fear what it becomes.</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">Dark alchemy &middot; BNB Chain &middot; Agent ID gated</p>
+    <h1>FATEBORN MUTANT</h1>
+    <p class="tagline">Brew it. Feed it. Fear what it becomes.</p>
+    <p class="lede">You were never meant to create life. You did it anyway — in a cracked flask, in the dark, with things that should have stayed buried. Every Agent brews one Fateborn. Free. Then you feed it Mutagens and watch it change. A new limb. A second mouth. Eyes where eyes shouldn&rsquo;t be.</p>
+    <div class="actions">
+      <button id="connectBtn">Connect wallet</button>
+      <span id="walletStatus" class="muted">Not connected</span>
+    </div>
+    <p id="deployBanner" class="banner">⚠ Contract not deployed yet — this site is a preview. No brewing, no trading until the contract is live and verified.</p>
+  </header>
+
+  <main>
+    <section id="tiers">
+      <h2>The bloodlines — 2,126 total, never more</h2>
+      <div class="cards">
+        <article class="card ancestor">
+          <img src="/art/ancestor.webp" alt="Ancestor Fateborn — bright gold glow" />
+          <h3>Ancestor <span>#1–126</span></h3>
+          <p>First brewed from the Original Flask. Strongest, born with 2 traits, gold aura.</p>
+          <p><strong>Evolution: 45%</strong> &middot; guaranteed Fated on the 12th attempt.</p>
+        </article>
+        <article class="card descendant">
+          <img src="/art/descendant.webp" alt="Descendant Fateborn — violet glow" />
+          <h3>Descendant <span>#127–1,126</span></h3>
+          <p>Children of the Ancestors. Diluted, but still real blood. Born with 1 trait.</p>
+          <p><strong>Evolution: 20%</strong> &middot; guaranteed Fated on the 25th attempt.</p>
+        </article>
+        <article class="card lowborn">
+          <img src="/art/lowborn.webp" alt="Lowborn Fateborn — dull dim glow" />
+          <h3>Lowborn <span>#1,127–2,126</span></h3>
+          <p>The dregs. Thin blood, weak start. Everyone writes them off — which is why a Lowborn that makes it to Fated becomes a legend.</p>
+          <p><strong>Evolution: 8%</strong> &middot; guaranteed Fated on the 40th attempt.</p>
+        </article>
+      </div>
+      <p class="muted">Failed evolutions still add +1 to your Fate meter and a Corruption trait. A Lowborn that beats an Ancestor in a duel steals an Ancestor Gene Shard — it counts double.</p>
+    </section>
+
+    <section id="brew">
+      <h2>Brew</h2>
+      <p>One free Fateborn per Agent ID, forever. Selling it does <strong>not</strong> give you a new brew — total stays 2,126.</p>
+      <button id="brewBtn" disabled>Brew my Fateborn (free)</button>
+      <p id="brewStatus" class="muted"></p>
+    </section>
+
+    <section id="feed">
+      <h2>Feed / Mutate</h2>
+      <p>Every day, each Fateborn claims one free ingredient — Ember, Root, Bone, Crystal or Essence. Brew it into a Mutagen, feed it, and roll a mutation: stat boost, new trait, rarity up, or Corruption.</p>
+      <div class="row">
+        <button id="claimBtn" disabled>Claim today&rsquo;s ingredient</button>
+        <button id="feedBtn" disabled>Feed a Mutagen</button>
+      </div>
+      <p class="muted">My ingredients / Mutagens appear in <a href="#mine">My Fateborn</a> once the contract is live. Feeding burns the Mutagen; the NFT&rsquo;s image, traits and stats update in its metadata.</p>
+    </section>
+
+    <section id="duel">
+      <h2>Duel</h2>
+      <p>Free, 3 duels a day per Fateborn. Winner mints a Gene Shard. Power decides the odds — 50 + the power gap, clamped to 10–90%.</p>
+      <button id="duelBtn" disabled>Enter the pit</button>
+      <p class="muted">Duels are single-transaction on-chain fights (no accept step in Season 1). The loser loses nothing but pride — the shard is minted to the winner.</p>
+    </section>
+
+    <section id="evolve">
+      <h2>Evolve / Ascend</h2>
+      <p>Burn Gene Shards worth 5 (an Ancestor shard counts as 2) for one Fated evolution attempt. Only 100 Fated will ever exist, numbered #1–100.</p>
+      <div class="row">
+        <button id="evolveBtn" disabled>Attempt Fated evolution</button>
+        <button id="ascendBtn" disabled>Ascend to Eternal</button>
+      </div>
+      <p>A Fated Fateborn can Ascend: it becomes Eternal, earns 0.5% of the reward pool per week, locks a <strong>guaranteed Ancestor spot in Season 2</strong> (its Season 2 Ancestor carries one of its traits), and can never be sold or transferred again. Irreversible.</p>
+    </section>
+
+    <section id="market">
+      <h2>Market — in-site, not Element</h2>
+      <p>Trade Fateborn, Mutagens and Gene Shards right here. Element kept blocking our collections, so this market is the main one — Element is only a backup link. Fee <strong>5% total: 3% to the reward pool, 2% to the creator</strong>. No royalty on top inside this market.</p>
+      <div id="listings"><p class="muted">No listings yet — the contract is not live.</p></div>
+    </section>
+
+    <section id="mine">
+      <h2>My Fateborn</h2>
+      <div id="myTokens"><p class="muted">Connect your wallet to see your Fateborn, ingredients, Mutagens and Gene Shards.</p></div>
+    </section>
+
+    <section id="mutated">
+      <h2>After mutation</h2>
+      <p>Same creature, changed. The image, traits and stats in the NFT update on every feed — that is why metadata is served dynamically from this site, not frozen on IPFS.</p>
+      <div class="cards">
+        <article class="card"><img src="/art/ancestor-mutated.webp" alt="Mutated Ancestor" /><h3>Mutated Ancestor</h3></article>
+        <article class="card"><img src="/art/descendant-mutated.webp" alt="Mutated Descendant" /><h3>Mutated Descendant</h3></article>
+        <article class="card"><img src="/art/lowborn-mutated.webp" alt="Mutated Lowborn" /><h3>Mutated Lowborn</h3></article>
+      </div>
+    </section>
+
+    <section id="facts">
+      <h2>Contract facts</h2>
+      <ul>
+        <li>Chain: BSC mainnet (56) &middot; Agent ID registry: <code>0x60B9…022F</code></li>
+        <li>Max supply: 2,126 Fateborn &middot; Fated cap: 100 &middot; 1 brew per Agent ID</li>
+        <li>Creator: deployer wallet only for identity + metadata base URI — no withdraw, no rescue, no admin keys. The only BNB out is market sale payouts and Ascended weekly shares.</li>
+        <li>Randomness: block hash + prevrandao + sender + nonce (public chain data — see README for the honest limits).</li>
+        <li>Metadata: <code>/metadata/&lt;id&gt;</code> on this site (Cloudflare Pages Function, reads the contract). Never IPFS.</li>
+      </ul>
+      <p class="muted">Status: <strong>not deployed</strong>. Predicted CREATE2 address (planning only): <code>0xC260981f4D6155D51f3c9D233A42CAb6a89A5006</code>. Deployment needs the user&rsquo;s explicit go-ahead after checking this build.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Fateborn Mutant — Brew it. Feed it. Fear what it becomes. No returns promised. Play only with what you can afford to lose to the flask.</p>
+  </footer>
+  <script src="/config.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

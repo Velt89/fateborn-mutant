@@ -1,0 +1,68 @@
+/* Fateborn Mutant — Dark Grimoire + Bioluminescent (locked art direction).
+ * Black parchment, gold ink, glowing creature. No light theme. */
+:root {
+  --bg: #0a0908;
+  --panel: #14100c;
+  --panel-2: #1c1610;
+  --ink: #e8ddc4;
+  --muted: #9a8f74;
+  --gold: #d4a017;
+  --gold-glow: #ffd75e;
+  --violet: #8b5cf6;
+  --green: #4ade80;
+  --red: #ef4444;
+  --border: #3a2f1d;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.6;
+}
+.hero {
+  text-align: center;
+  padding: 3.5rem 1.25rem 2rem;
+  background: radial-gradient(ellipse at 50% 0%, #241a08 0%, var(--bg) 65%);
+  border-bottom: 1px solid var(--border);
+}
+.eyebrow { color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.8rem; }
+h1 {
+  font-size: clamp(2.4rem, 7vw, 4.5rem);
+  margin: 0.25rem 0;
+  color: var(--gold-glow);
+  text-shadow: 0 0 24px rgba(212, 160, 23, 0.45);
+  letter-spacing: 0.04em;
+}
+.tagline { font-style: italic; font-size: 1.25rem; color: var(--ink); }
+.lede { max-width: 640px; margin: 1rem auto; color: var(--muted); }
+main { max-width: 960px; margin: 0 auto; padding: 0 1.25rem 3rem; }
+section { padding: 2rem 0; border-bottom: 1px solid var(--border); }
+h2 { color: var(--gold); font-size: 1.6rem; margin-top: 0; }
+h3 span { color: var(--muted); font-size: 0.9rem; }
+.muted { color: var(--muted); }
+.banner {
+  max-width: 640px; margin: 1.5rem auto 0; padding: 0.75rem 1rem;
+  background: #2a1f08; border: 1px solid var(--gold); border-radius: 6px;
+}
+button {
+  background: var(--gold); color: #1a1206; border: none; border-radius: 6px;
+  padding: 0.7rem 1.4rem; font-family: inherit; font-size: 1rem; font-weight: bold;
+  cursor: pointer; margin-right: 0.5rem;
+}
+button:disabled { background: #3a3226; color: #8a7f68; cursor: not-allowed; }
+button:hover:not(:disabled) { background: var(--gold-glow); }
+.row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem;
+}
+.card img { width: 100%; border-radius: 6px; display: block; }
+.card.ancestor { border-color: var(--gold); box-shadow: 0 0 24px rgba(212, 160, 23, 0.15); }
+.card.descendant { border-color: var(--violet); box-shadow: 0 0 24px rgba(139, 92, 246, 0.15); }
+.card.lowborn { border-color: #3f4a3a; }
+code { background: var(--panel-2); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.9rem; }
+footer { text-align: center; color: var(--muted); padding: 2rem 1rem; font-size: 0.9rem; }
+a { color: var(--gold-glow); }

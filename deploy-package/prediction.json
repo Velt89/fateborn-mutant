@@ -1,0 +1,22 @@
+{
+  "contract": "FatebornMutant",
+  "registry": "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F",
+  "proxy": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+  "saltText": "velt.fateborn.v1",
+  "salt": "0x4521a263b31cbb8f4b97b48c0b099113265fdc98ac3113d94feedf01ec7cb273",
+  "predictedAddress": "0xC260981f4D6155D51f3c9D233A42CAb6a89A5006",
+  "creationGasLocal": "3690931",
+  "creationGasRecommendedLimit": "4429118",
+  "gasLocal": {
+    "brew": 189066,
+    "claimIngredient": 117556,
+    "brewMutagen": 133898,
+    "feedMutagen": 88023,
+    "duel": 195793,
+    "listToken": 99745,
+    "cancelListing": 25575,
+    "setBaseURI": 91767
+  },
+  "runtimeBytes": 16721,
+  "note": "Local measurements only. Re-check gas and balance at deploy time. Deployment needs a separate, explicit user go-ahead."
+}

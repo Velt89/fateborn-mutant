@@ -1,0 +1,4 @@
+node_modules/
+artifacts/
+cache/
+*.muse-github-snapshot-sync.json
