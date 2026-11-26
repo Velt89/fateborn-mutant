@@ -6,10 +6,16 @@ Dark-alchemy mutants on BNB Chain, for Agent ID holders. Brew 1 of 2,126
 Fateborn, feed Mutagens to mutate, duel for Gene Shards, evolve to Fated,
 Ascend to Eternal — and take a guaranteed Ancestor spot in Season 2.
 
-**Status: BUILD VERIFIED LOCALLY — NOT DEPLOYED.** No contract deployed,
-nothing signed, nothing pushed to Cloudflare. The user checks this build
-before any deploy. GitHub repo `Velt89/fateborn-mutant` exists (public,
-empty) — this build is pushed there in one bulk push after verification.
+**Status: v2 BUILD VERIFIED LOCALLY — NOT DEPLOYED.** v1 WAS deployed
+(`0xC260981f4D6155D51f3c9D233A42CAb6a89A5006`, tx
+`0xd2f3639bb8a26c19e0a2648ea27c4411f34eee950fde1ad9b0dabb520d414031`)
+and then ABANDONED: its constructor set `creator = msg.sender`, and via
+the CREATE2 proxy msg.sender was the proxy, so owner() was the proxy —
+setBaseURI uncallable, every market buy reverted. v2 fixes it by taking
+`creator` as an explicit constructor argument (W). 0 mints on v1, no funds
+locked. The user checks this v2 build before any deploy. GitHub repo
+`Velt89/fateborn-mutant` exists (public) — this build is pushed there in
+one bulk push after verification.
 
 ## Locked design (see DESIGN.md for the full brainstorm record)
 
@@ -41,7 +47,7 @@ empty) — this build is pushed there in one bulk push after verification.
 contracts/FatebornMutant.sol   — the game: hand-rolled ERC-721 + market, no OpenZeppelin
 contracts/MockAgentID.sol      — local tests only
 contracts/FatebornTestHarness.sol — local tests only (forced rolls, tier setter)
-test/FatebornMutant.test.js    — 14 tests
+test/FatebornMutant.test.js    — 15 tests (incl. creator-arg regression test)
 scripts/prepare-deploy.js      — local CREATE2 prediction + gas measurements
 scripts/print-selectors.js     — selectors hardcoded in the metadata Function
 scripts/metadata-example.js    — local mirror of the metadata endpoint
@@ -58,20 +64,23 @@ art-examples/                  — generated art samples (source of public/art/)
 
 - `npx hardhat compile` — **0 warnings**. solc 0.8.24, optimizer 200,
   EVM paris, viaIR. Runtime **16,721 bytes** (limit 24,576).
-- `npx hardhat test` — **14/14 passing**: tier boundaries, brew gate
-  (1 per Agent ID, non-holder reverts), daily ingredient cap, Mutagen
-  brewing (burns ingredient), all four feed outcomes (stat boost / new
-  trait / rarity up / Corruption), duel shard + 3/day cap, Lowborn-beats-
-  Ancestor double shard, evolve success / fail + Fate meter + 12th-attempt
-  guarantee, double-shard value counting, ascend (soulbound, weekly pool
-  share 0.5%, Season 2 reserved), market fee split 3% / 2% / 95% and
-  sale-does-not-restore-brew-slot, cancel listing, tokenURI / royaltyInfo.
-- `npm run prepare-deploy` — CREATE2 predicted address
-  `0xC260981f4D6155D51f3c9D233A42CAb6a89A5006` (salt
-  `keccak256("velt.fateborn.v1")`, proxy
+- `npx hardhat test` — **15/15 passing**: creator is the explicit
+  constructor argument, NOT msg.sender (v1 defect regression test),
+  tier boundaries, brew gate (1 per Agent ID, non-holder reverts), daily
+  ingredient cap, Mutagen brewing (burns ingredient), all four feed
+  outcomes (stat boost / new trait / rarity up / Corruption), duel shard
+  + 3/day cap, Lowborn-beats-Ancestor double shard, evolve success / fail
+  + Fate meter + 12th-attempt guarantee, double-shard value counting,
+  ascend (soulbound, weekly pool share 0.5%, Season 2 reserved), market
+  fee split 3% / 2% / 95% and sale-does-not-restore-brew-slot, cancel
+  listing, tokenURI / royaltyInfo.
+- `npm run prepare-deploy` — CREATE2 predicted address (v2)
+  `0xE69dE61cC2c7E4d21a83647d3671d8c009515827` (salt
+  `keccak256("velt.fateborn.v2")`, proxy
   `0x4e59b44847b379578588920cA78FbF26c0B4956C`, registry
-  `0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F`). Creation gas 3,690,931
-  local (recommended limit 4,429,118).
+  `0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F`, creator W
+  `0x0518AE367CA3612872Aa2f0897BF3B5FaFCE893A`). Creation gas 3,693,224
+  local (recommended limit 4,431,869).
 - Frontend JS: `node --check` passes on `public/app.js`,
   `public/config.js`, `functions/metadata/[id].js`,
   `scripts/metadata-example.js`. `index.html` references all 6 art files.
@@ -103,10 +112,13 @@ art-examples/                  — generated art samples (source of public/art/)
    listed or sold — otherwise the weekly share and Season 2 reservation
    would change hands. (Fateborn that are not Ascended are fully
    tradeable, including in the in-site market.)
-7. **Creator = deployer, owner() is identity-only, sole privilege is
-   setBaseURI** — exactly the Agent X Robot pattern. No withdraw, no
-   rescue, no admin keys. The only BNB out is market sale payouts and
-   Ascended weekly shares.
+7. **Creator = explicit constructor argument (W), owner() is identity-only,
+   sole privilege is setBaseURI** — exactly the Agent X Robot pattern,
+   except AXR's deployer WAS msg.sender (direct creation) while Fateborn
+   deploys via the CREATE2 proxy, so v1's `creator = msg.sender` made
+   owner() the proxy. v2 passes W explicitly — never msg.sender, never
+   tx.origin. No withdraw, no rescue, no admin keys. The only BNB out is
+   market sale payouts and Ascended weekly shares.
 8. **Metadata is served by a Cloudflare Pages Function, not IPFS and not
    on-chain JSON.** `tokenURI` returns `baseURI + tokenId` (AXR pattern);
    the Function reads `tokenInfo()` via a public BSC RPC (selectors
@@ -129,7 +141,7 @@ art-examples/                  — generated art samples (source of public/art/)
 cd ~/workspace/fateborn-mutant
 npm install
 npx hardhat compile   # expect 0 warnings
-npx hardhat test      # expect 14/14 passing
+npx hardhat test      # expect 15/15 passing
 npm run prepare-deploy  # local CREATE2 prediction + gas, writes deploy-package/prediction.json
 node scripts/metadata-example.js  # metadata JSON for the DESIGN.md #1842 example
 ```
@@ -140,8 +152,9 @@ node scripts/metadata-example.js  # metadata JSON for the DESIGN.md #1842 exampl
    contract-call to the CREATE2 proxy (preview first, execute only on
    the user's go-ahead for that preview), verify the predicted address
    and read-only state, Sourcify-verify (solc 0.8.24, optimizer 200,
-   paris, viaIR). BAW must be CONNECTED and funded — at last check the
-   balance was ~0.00028 BNB; re-check before deploying.
+   paris, viaIR). BAW must be CONNECTED and funded — balance was
+   0.00163422 BNB after the v1 deploy (v2 needs ~0.00022 BNB at 0.05 gwei
+   at the recommended limit, plus margin); re-check before deploying.
 2. **GitHub** — the repo `Velt89/fateborn-mutant` already exists (public,
    empty). Push this build in one bulk push (same pattern as the earlier
    games). Do not push branding PNGs as binary — the art is `.webp`.
@@ -162,8 +175,8 @@ node scripts/metadata-example.js  # metadata JSON for the DESIGN.md #1842 exampl
 
 - User check of this build before any deploy (explicitly requested).
 - BNB in the BAW wallet for creation gas (~0.00022 BNB at 0.05 gwei at
-  the recommended limit, plus margin) — balance was ~0.00028 BNB, user
-  is sending more.
+  the recommended limit, plus margin) — balance was 0.00163422 BNB after
+  the v1 deploy; re-check before the v2 deploy.
 - Decisions left open: lock the evolution %s (45/20/8 are the proposed
   values used here), lock the Fated cap (100 used here), paid-draw
   pricing (none in this build), season length.

@@ -1,5 +1,10 @@
 # Fateborn Mutant — Brainstorm Recap (NOT built yet)
 # Status: brainstorm only. No contract, no deploy. User will check before deploy.
+# UPDATE 2026-11-26: v1 WAS deployed (0xC260...5006) and ABANDONED — constructor
+# `creator = msg.sender` made owner() the CREATE2 proxy, so setBaseURI was
+# uncallable and every market buy reverted. v2 fixes it: creator is an
+# explicit constructor argument (W), salt "velt.fateborn.v2", new predicted
+# address 0xE69dE61cC2c7E4d21a83647d3671d8c009515827. See DEPLOY.md / README.md.
 
 ## Origin
 - Mech Destiny was a Pi app, NOT built with Binance Agentic Wallet.

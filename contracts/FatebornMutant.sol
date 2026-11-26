@@ -2,15 +2,21 @@
 pragma solidity 0.8.24;
 
 /// @title Fateborn Mutant — dark-alchemy mutants on BNB Chain, for Agent ID holders
-/// @notice BUILD ONLY — not deployed. Single hand-rolled ERC-721 contract
+/// @notice v2 — fixes the v1 deploy defect. v1 (0xC260981f4D6155D51f3c9D233A42CAb6a89A5006,
+/// tx 0xd2f3639bb8a26c19e0a2648ea27c4411f34eee950fde1ad9b0dabb520d414031, 0 mints)
+/// set `creator = msg.sender` in the constructor, but deployed via the
+/// CREATE2 proxy msg.sender was the proxy, so owner() was the proxy:
+/// setBaseURI was uncallable and every market buy reverted on the creator
+/// payout. v2 takes `creator` as an EXPLICIT constructor argument (W) —
+/// never msg.sender, never tx.origin. Single hand-rolled ERC-721 contract
 /// (game + in-site market), following the RamenForge / Agent X Robot pattern:
-/// Agent ID gating via the SPACE ID registry, creator = deployer with
-/// owner() for identity only (its ONLY privilege is setBaseURI, as in AXR),
-/// no withdraw / rescue / admin keys of any kind. The ONLY way BNB leaves
-/// this contract is (a) a market sale payout to the seller, (b) the market
-/// creator fee, (c) an Ascended weekly pool-share claim. Royalties from
-/// external marketplaces (ERC-2981, 5%) are paid to this contract and land
-/// in the reward pool.
+/// Agent ID gating via the SPACE ID registry, creator = explicit constructor
+/// argument with owner() for identity only (its ONLY privilege is setBaseURI,
+/// as in AXR), no withdraw / rescue / admin keys of any kind. The ONLY way
+/// BNB leaves this contract is (a) a market sale payout to the seller, (b)
+/// the market creator fee, (c) an Ascended weekly pool-share claim.
+/// Royalties from external marketplaces (ERC-2981, 5%) are paid to this
+/// contract and land in the reward pool.
 ///
 /// THE GAME (locked design, ~/workspace/fateborn-mutant/DESIGN.md):
 /// - Brew ONE free Fateborn per Agent ID holder. Total supply 2,126.
@@ -90,7 +96,10 @@ contract FatebornMutant {
     uint16 public constant TRAIT_CORRUPTION = 1 << 8;
 
     IAgentID public immutable agentIdRegistry;
-    address public creator;
+    /// @notice Payable: market creator-fee payouts (2% of every in-site sale) go here.
+    /// Set ONLY from the explicit constructor argument — never msg.sender
+    /// (the CREATE2 proxy is msg.sender at deploy time, see v1 defect above).
+    address payable public creator;
 
     string private _baseURI;
 
@@ -158,10 +167,18 @@ contract FatebornMutant {
     event Sold(address indexed seller, address indexed buyer, uint256 tokenId, uint256 price, uint256 poolShare, uint256 creatorShare);
     event PoolFunded(address indexed from, uint256 amount);
 
-    constructor(address registry) {
+    /// @param registry Agent ID registry (SPACE ID).
+    /// @param creator_ Creator wallet (W) — set from this argument ONLY.
+    /// Must be an EOA the creator controls: setBaseURI is creator-only, and
+    /// market creator-fee payouts are plain BNB calls to this address, so it
+    /// must be able to receive BNB. NEVER msg.sender: deployed via the
+    /// CREATE2 proxy, msg.sender is the proxy (v1 defect — owner() was the
+    /// proxy, setBaseURI uncallable, every market buy reverted).
+    constructor(address registry, address creator_) {
         require(registry != address(0), "registry is zero address");
+        require(creator_ != address(0), "creator is zero address");
         agentIdRegistry = IAgentID(registry);
-        creator = msg.sender;
+        creator = payable(creator_);
     }
 
     /// @notice The creator's ONLY privilege: set the metadata base URI.

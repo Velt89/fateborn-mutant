@@ -11,7 +11,9 @@ async function deploy() {
   const Mock = await ethers.getContractFactory("MockAgentID");
   const mock = await Mock.deploy();
   const Harness = await ethers.getContractFactory("FatebornTestHarness");
-  const game = await Harness.deploy(await mock.getAddress());
+  // v2: creator is an EXPLICIT constructor argument (W on mainnet) — never
+  // msg.sender (the CREATE2 proxy is msg.sender at deploy time, v1 defect).
+  const game = await Harness.deploy(await mock.getAddress(), creator.address);
   for (const u of [alice, bob, carol]) await mock.setHolder(u.address, true);
   // dave: no Agent ID. creator: deployer, not a holder.
   return { game, mock, creator, alice, bob, carol, dave };
@@ -66,6 +68,24 @@ async function farmShards(game, winner, loser, winnerId, loserId, n) {
 }
 
 describe("FatebornMutant", function () {
+  it("creator: explicit constructor argument, NOT msg.sender (v1 defect fix)", async function () {
+    const { game, creator } = await deploy();
+    // The deployer IS the creator here only because the test passes
+    // creator.address explicitly — the contract never reads msg.sender.
+    expect(await game.creator()).to.equal(creator.address);
+    expect(await game.owner()).to.equal(creator.address);
+    // A zero creator arg must revert.
+    const Harness = await ethers.getContractFactory("FatebornTestHarness");
+    const Mock = await ethers.getContractFactory("MockAgentID");
+    const mock = await Mock.deploy();
+    await expect(
+      Harness.deploy(await mock.getAddress(), ethers.ZeroAddress)
+    ).to.be.revertedWith("creator is zero address");
+    await expect(
+      Harness.deploy(ethers.ZeroAddress, creator.address)
+    ).to.be.revertedWith("registry is zero address");
+  });
+
   it("tiers: serial boundaries 1/126 Ancestor, 127/1126 Descendant, 1127/2126 Lowborn", async function () {
     const { game } = await deploy();
     expect(await game.tierForSerial(1)).to.equal(0);

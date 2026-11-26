@@ -11,7 +11,7 @@ contract FatebornTestHarness is FatebornMutant {
     uint256 public forcedRoll;
     bool public useForced;
 
-    constructor(address registry) FatebornMutant(registry) {}
+    constructor(address registry, address creator_) FatebornMutant(registry, creator_) {}
 
     function setForcedRoll(uint256 roll) external {
         forcedRoll = roll;

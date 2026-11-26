@@ -7,8 +7,11 @@
  *  - predicts the CREATE2 address for the real deployment:
  *      proxy 0x4e59b44847b379578588920cA78FbF26c0B4956C (same deterministic
  *      deployment proxy used by AgentProof / DailyFest / RamenForge),
- *      salt keccak256("velt.fateborn.v1"),
- *      constructor arg: Agent ID registry 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F.
+ *      salt keccak256("velt.fateborn.v2"),
+ *      constructor args: Agent ID registry
+ *      0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F AND creator W
+ *      0x0518AE367CA3612872Aa2f0897BF3B5FaFCE893A (explicit arg — v2 fix for
+ *      the v1 defect, where creator = msg.sender made owner() the proxy).
  *  - writes deploy-package/prediction.json.
  *
  * The real deployment (BAW contract-call to the proxy) is a separate,
@@ -20,8 +23,9 @@ const fs = require("fs");
 const path = require("path");
 
 const REGISTRY = "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F";
+const CREATOR = "0x0518AE367CA3612872Aa2f0897BF3B5FaFCE893A"; // W — explicit constructor arg (v2 fix)
 const PROXY = "0x4e59b44847b379578588920cA78FbF26c0B4956C";
-const SALT_TEXT = "velt.fateborn.v1";
+const SALT_TEXT = "velt.fateborn.v2";
 
 async function main() {
   const [deployer, alice, bob] = await ethers.getSigners();
@@ -29,18 +33,19 @@ async function main() {
   const mock = await Mock.deploy();
   const Game = await ethers.getContractFactory("FatebornMutant");
 
-  // Creation gas (local, mock registry as constructor arg).
-  const creationTx = await Game.getDeployTransaction(await mock.getAddress());
+  // Creation gas (local, mock registry + deployer as creator for measurement).
+  const creationTx = await Game.getDeployTransaction(await mock.getAddress(), deployer.address);
   const creationGas = await ethers.provider.estimateGas(creationTx);
-  const game = await Game.deploy(await mock.getAddress());
+  const game = await Game.deploy(await mock.getAddress(), deployer.address);
   await game.waitForDeployment();
   const address = await game.getAddress();
   console.log("local FatebornMutant at", address);
+  console.log("local creator (deployer, measurement only):", deployer.address);
   console.log("creation gas (local estimate):", creationGas.toString());
 
-  // CREATE2 prediction for the real deployment.
+  // CREATE2 prediction for the real deployment (registry + W as creator).
   const artifact = require("../artifacts/contracts/FatebornMutant.sol/FatebornMutant.json");
-  const initCode = artifact.bytecode + ethers.AbiCoder.defaultAbiCoder().encode(["address"], [REGISTRY]).slice(2);
+  const initCode = artifact.bytecode + ethers.AbiCoder.defaultAbiCoder().encode(["address", "address"], [REGISTRY, CREATOR]).slice(2);
   const salt = ethers.keccak256(ethers.toUtf8Bytes(SALT_TEXT));
   const predicted = ethers.getCreate2Address(PROXY, salt, ethers.keccak256(initCode));
   console.log("CREATE2 predicted address:", predicted);
@@ -72,7 +77,9 @@ async function main() {
 
   const out = {
     contract: "FatebornMutant",
+    version: "v2",
     registry: REGISTRY,
+    creator: CREATOR,
     proxy: PROXY,
     saltText: SALT_TEXT,
     salt,
